@@ -1,4 +1,4 @@
-# Endrit OS v2.4 — SXS / Optional Windows features removal
+﻿# Endrit OS v2.4 — SXS / Optional Windows features removal
 # Based on Atlas-OS win-sxs.yml patterns (GPL-3.0)
 $ErrorActionPreference = 'SilentlyContinue'
 

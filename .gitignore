@@ -4,6 +4,10 @@ toolbox-endrit/
 *.zip
 *.exe
 *.apbx
+_pb25/
+_ref-*
+_dl-test*
+_v233-extract/
 
 # Discord setup scripts (not part of OS)
 discord-setup.ps1

@@ -32,7 +32,7 @@ actions:
       command: >-
         $d = 'C:\ProgramData\EndritOS';
         if (!(Test-Path $d)) { New-Item -ItemType Directory -Path $d -Force | Out-Null };
-        @{ setupComplete=$true; restartRecommended=$true; completedAt=(Get-Date -Format 'o'); message='Endrit OS v2.4.0 setup complete. Restart when convenient â€” open Endrit Toolbox from the desktop.' } | ConvertTo-Json | Set-Content "$d\setup.json" -Encoding UTF8
+        @{ setupComplete=$true; restartRecommended=$true; completedAt=(Get-Date -Format 'o'); message='Endrit OS v2.5.0 setup complete. Restart when convenient - open Endrit Toolbox from the desktop.' } | ConvertTo-Json | Set-Content "$d\setup.json" -Encoding UTF8
 
   # Desktop shortcut
   - !powerShell:
@@ -44,5 +44,5 @@ actions:
   # Restart Explorer
   - !run: {exe: 'explorer.exe', wait: false, errorAction: Ignore}
 
-  - !writeStatus: {status: "Endrit OS v2.4.0 install complete â€” please restart"}
+  - !writeStatus: {status: "Endrit OS v2.5.0 install complete - please restart"}
 

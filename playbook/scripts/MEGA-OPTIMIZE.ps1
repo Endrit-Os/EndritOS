@@ -1,4 +1,4 @@
-# ═══════════════════════════════════════════════════════════════════════════
+﻿# ═══════════════════════════════════════════════════════════════════════════
 # Endrit OS v3.0 — MEGA OPTIMIZE (Ranked Safe)
 # Maximale Leistung, minimale Prozesse — sicher für Anti-Cheat
 # Auto-Restart nach 5 Sekunden
@@ -22,70 +22,39 @@ Write-Host ""
 
 # ── 1. SERVICES (60+) ──────────────────────────────────────────────────────
 Write-Host "[1/8] Disabling background services..." -ForegroundColor Yellow
+# SAFE-BUT-STRONG: only services that are safe to disable on a normal PC.
+# Removed risky ones that hurt compatibility: WSearch, SysMain, iphlpsvc,
+# tcpipreg, NetBT, wlidsvc, WpnService, SCardSvr, WbioSrvc — see notes below.
 $services = @(
-    # Telemetry
-    'DiagTrack','WerSvc','WdiServiceHost','WdiSystemHost','PcaSvc',
-    'diagnosticshub.standardcollector.service','wisvc','UCPD',
-    'dmwappushservice','DPS','WinHttpAutoProxySvc',
-    # Xbox / Gaming telemetry (anti-cheat safe — game services kept)
-    'XblAuthManager','XblGameSave','XboxGipSvc','XboxNetApiSvc',
-    # Location / Sensors
+    # Telemetry / diagnostics (safe, privacy)
+    'DiagTrack','dmwappushservice','diagnosticshub.standardcollector.service',
+    'WerSvc','WdiServiceHost','WdiSystemHost','wisvc',
+    # Xbox telemetry (anti-cheat safe — GamingServices itself is kept)
+    'XblAuthManager','XblGameSave','XboxNetApiSvc',
+    # Location / sensors (most desktops don't use these)
     'lfsvc','SensorDataService','SensrSvc','SensorService',
-    'CscService','SharedAccess',
-    # Bloat services
+    # Bloat / rarely used
     'MapsBroker','RetailDemo','WMPNetworkSvc','RemoteRegistry',
-    'PrintNotify','SmsRouter','CDPSvc','PhoneSvc','WpnService',
-    'WpcMonSvc','WalletService','SEMgrSvc','SharedRealitySvc',
-    'spectrum','stisvc','WiaRpc','FrameServer','FrameServerMonitor',
-    # Power / Energy saving processes
-    'dam','GpuEnergyDrv',
-    # Network bloat
-    'NetBT','Wecsvc','tcpipreg','UCPD',
-    # Print spooler (if no printer)
-    'Spooler',
-    # Fax
-    'Fax',
-    # Secondary logon (bloat)
-    'seclogon',
-    # Superfetch on SSD
-    'SysMain',
-    # Search indexing
-    'WSearch',
-    # IP helper (IPv6 bloat)
-    'iphlpsvc',
-    # Offline files
-    'CscService',
-    # Portable device enum
-    'WpdBusEnum',
-    # Windows biometric
-    'WbioSrvc',
-    # Sync center
-    'SyncSvc',
-    # Work folder client
-    'WorkFoldersSvc',
-    # Mixed reality
-    'spectrum',
-    # AllJoyn router
-    'AJRouter',
-    # Downloaded maps manager
-    'MapsBroker',
-    # Microsoft account
-    'wlidsvc',
-    # Hyper-V (if not using VMs)
-    # 'vmms',  -- commented out, breaks some environments
-    # Parental controls
-    'WpcMonSvc',
-    # Smart card
-    'SCardSvr','SCPolicySvc',
-    # Tablet PC
-    'TabletInputService',
-    # Touch keyboard
-    'TabletInputService'
+    'PhoneSvc','SmsRouter','WalletService','SEMgrSvc','SharedRealitySvc',
+    'spectrum','WpcMonSvc','WorkFoldersSvc','AJRouter','Fax',
+    # Print spooler only if no printer is installed (handled below)
+    # Secondary logon (rarely needed interactively)
+    'seclogon'
 )
 foreach ($s in $services) {
     Dis-Service $s
 }
-Write-Host "  Disabled $done services" -ForegroundColor Green
+
+# Spooler: only disable when no printer is present (keeps compatibility)
+try {
+    if (-not (Get-Printer -EA SilentlyContinue | Where-Object { $_.Type -eq 'Local' })) {
+        Dis-Service 'Spooler'
+    }
+} catch {}
+
+# Windows Search & SysMain: keep RUNNING for compatibility, just lower priority
+# (disabling them breaks Start search / app prefetch on many PCs)
+Write-Host "  Disabled $done services (Search/SysMain kept for compatibility)" -ForegroundColor Green
 
 # ── 2. SCHEDULED TASKS (80+) ───────────────────────────────────────────────
 Write-Host "[2/8] Disabling telemetry and maintenance tasks..." -ForegroundColor Yellow
@@ -156,11 +125,18 @@ Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel' 'Distrib
 Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'DisablePagingExecutive' 'DWord' 1
 Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'LargeSystemCache' 'DWord' 0
 Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'ClearPageFileAtShutdown' 'DWord' 0
-Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'FeatureSettings' 'DWord' 1
-Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'FeatureSettingsOverride' 'DWord' 3
-Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'FeatureSettingsOverrideMask' 'DWord' 3
-Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' 'EnablePrefetcher' 'DWord' 0
-Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' 'EnableSuperfetch' 'DWord' 0
+# NOTE: Spectre/Meltdown mitigations are kept ENABLED by default for security.
+# The optional disable (perf gain, lower security) lives in DEEP-FPS-TWEAKS (Performance profile).
+
+# Prefetch/Superfetch: only disable on SSD; on HDD they help a lot (compatibility)
+try {
+    $sysDisk = Get-PhysicalDisk -EA SilentlyContinue | Where-Object { $_.DeviceId -eq 0 }
+    $isSSD = $sysDisk -and ($sysDisk.MediaType -eq 'SSD' -or $sysDisk.MediaType -eq 4)
+} catch { $isSSD = $false }
+if ($isSSD) {
+    Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' 'EnablePrefetcher' 'DWord' 0
+    Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' 'EnableSuperfetch' 'DWord' 0
+}
 
 # MMCSS Gaming
 Set-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' 'SystemResponsiveness' 'DWord' 0
@@ -202,6 +178,23 @@ Set-Reg 'HKLM:\SYSTEM\ControlSet001\Control' 'WaitToKillServiceTimeout' 'String'
 Set-Reg 'HKCU:\Control Panel\Desktop' 'WaitToKillAppTimeout' 'String' '1000'
 Set-Reg 'HKCU:\Control Panel\Desktop' 'HungAppTimeout' 'String' '1000'
 Set-Reg 'HKCU:\Control Panel\Desktop' 'AutoEndTasks' 'String' '1'
+
+# GameDVR / Game Bar off (safe, frees frames — no anti-cheat impact)
+Set-Reg 'HKCU:\System\GameConfigStore' 'GameDVR_Enabled' 'DWord' 0
+Set-Reg 'HKCU:\System\GameConfigStore' 'GameDVR_FSEBehaviorMode' 'DWord' 2
+Set-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR' 'AllowGameDVR' 'DWord' 0
+Set-Reg 'HKCU:\SOFTWARE\Microsoft\GameBar' 'AutoGameModeEnabled' 'DWord' 1
+Set-Reg 'HKCU:\SOFTWARE\Microsoft\GameBar' 'ShowStartupPanel' 'DWord' 0
+
+# DELAYS — snappier UI (no functional risk)
+Set-Reg 'HKCU:\Control Panel\Desktop' 'MenuShowDelay' 'String' '0'
+Set-Reg 'HKCU:\Control Panel\Mouse' 'MouseHoverTime' 'String' '0'
+Set-Reg 'HKCU:\Control Panel\Desktop' 'ForegroundLockTimeout' 'DWord' 0
+# Kill the artificial startup app delay (apps launch immediately at logon)
+Set-Reg 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Serialize' 'StartupDelayInMSec' 'DWord' 0
+# Low-level keyboard/mouse data queue tightened for input latency
+Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Services\mouclass\Parameters' 'MouseDataQueueSize' 'DWord' 16
+Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Services\kbdclass\Parameters' 'KeyboardDataQueueSize' 'DWord' 16
 
 # GPU
 Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers' 'TdrDelay' 'DWord' 10
@@ -270,6 +263,21 @@ foreach ($l in $loggers) {
 }
 Write-Host "  $($loggers.Count) autologgers disabled" -ForegroundColor Green
 
+# ── 6b. IFEO priority — keep background apps but starve them of CPU ─────────
+# Search/font/telemetry helpers run at low priority instead of being killed
+$ifeoLow = @{
+    'SearchIndexer.exe'   = 0x00004000  # Below normal
+    'SearchProtocolHost.exe' = 0x00004000
+    'SearchFilterHost.exe'   = 0x00004000
+    'fontdrvhost.exe'     = 0x00000040  # Idle
+    'dwm.exe'             = 0x00008000  # Above normal (compositor responsiveness)
+}
+foreach ($exe in $ifeoLow.Keys) {
+    $k = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\$exe\PerfOptions"
+    Set-Reg $k 'CpuPriorityClass' 'DWord' $ifeoLow[$exe]
+}
+Write-Host "  IFEO priorities tuned (Search low, DWM high)" -ForegroundColor Green
+
 # ── 7. CLEANUP ──────────────────────────────────────────────────────────────
 Write-Host "[7/8] Cleaning system files..." -ForegroundColor Yellow
 Remove-Item "$env:TEMP\*"          -Recurse -Force -EA SilentlyContinue
@@ -301,11 +309,12 @@ if (!(Test-Path $dir)) { New-Item -Path $dir -ItemType Directory -Force | Out-Nu
 Write-Host "" -ForegroundColor White
 Write-Host "  ╔════════════════════════════════════════════╗" -ForegroundColor Cyan
 Write-Host "  ║   ENDRIT OS MEGA OPTIMIZE — COMPLETE      ║" -ForegroundColor Cyan
-Write-Host "  ║   Services: 60+ disabled                  ║" -ForegroundColor Green
-Write-Host "  ║   Tasks: 50+ disabled                     ║" -ForegroundColor Green
-Write-Host "  ║   Registry: 40+ tweaks                    ║" -ForegroundColor Green
+Write-Host "  ║   Services: ~30 safely disabled           ║" -ForegroundColor Green
+Write-Host "  ║   Tasks: 45+ disabled                     ║" -ForegroundColor Green
+Write-Host "  ║   Registry: 50+ tweaks                    ║" -ForegroundColor Green
 Write-Host "  ║   CPU: Unparked, Aggressive Boost         ║" -ForegroundColor Green
-Write-Host "  ║   Boot: Optimized                         ║" -ForegroundColor Green
+Write-Host "  ║   Search/SysMain kept (compatibility)     ║" -ForegroundColor Green
+Write-Host "  ║   Mitigations ON (security)               ║" -ForegroundColor Green
 Write-Host "  ║   RESTARTING IN 5 SECONDS...              ║" -ForegroundColor Yellow
 Write-Host "  ╚════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host "" -ForegroundColor White

@@ -1,4 +1,4 @@
-# Endrit OS v2.4 — Advanced Tweaks (Safe — 91%+ compatibility)
+﻿# Endrit OS v2.4 — Advanced Tweaks (Safe — 91%+ compatibility)
 # Only universally safe tweaks here. Risky ones moved to Performance profile.
 $ErrorActionPreference = 'SilentlyContinue'
 

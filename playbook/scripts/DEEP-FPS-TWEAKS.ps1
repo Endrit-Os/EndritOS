@@ -1,4 +1,4 @@
-# Endrit OS — Deep FPS Tweaks v3
+﻿# Endrit OS — Deep FPS Tweaks v3
 # Every tweak here is safe for Ranked Safe + anti-cheat
 $ErrorActionPreference = 'SilentlyContinue'
 
@@ -77,8 +77,54 @@ Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Managemen
 Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'FeatureSettingsOverride'     'DWord' 3
 Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'FeatureSettingsOverrideMask' 'DWord' 3
 
-# ── Interrupt affinity — NVIDIA (disable MSI mode issues) ────────────────────
-# Note: MSI mode is better but requires manual GPU driver config — left for user
+# ── MSI mode for GPU (Message Signaled Interrupts) — big latency win ─────────
+# Enables MSI on the primary GPU instead of legacy line-based interrupts.
+try {
+    $gpuDev = Get-CimInstance Win32_VideoController | Where-Object { $_.PNPDeviceID -match '^PCI' } | Select-Object -First 1
+    if ($gpuDev -and $gpuDev.PNPDeviceID) {
+        $msiPath = "HKLM:\SYSTEM\CurrentControlSet\Enum\$($gpuDev.PNPDeviceID)\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties"
+        Set-Reg $msiPath 'MSISupported' 'DWord' 1
+        Write-Host "  MSI mode: enabled on GPU ($($gpuDev.Name))" -ForegroundColor Green
+    }
+} catch {}
+
+# ── Per-game CPU priority (IFEO) — games run at High priority class ──────────
+$ifeoGames = @('VALORANT-Win64-Shipping.exe','cs2.exe','r5apex.exe',
+               'RainbowSix.exe','FortniteClient-Win64-Shipping.exe',
+               'csgo.exe','LeagueClient.exe','League of Legends.exe')
+foreach ($g in $ifeoGames) {
+    Set-Reg "$ifeo\$g\PerfOptions" 'CpuPriorityClass' 'DWord' 3   # High
+    Set-Reg "$ifeo\$g\PerfOptions" 'IoPriority'        'DWord' 3
+}
+Write-Host "  Per-game priority: High set for $($ifeoGames.Count) titles" -ForegroundColor Green
+
+# ── Fewer processes: group services into shared svchost ──────────────────────
+# When threshold >= physical RAM, Windows consolidates services -> fewer PIDs.
+try {
+    $ramKB = [int]((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1KB)
+    Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control' 'SvcHostSplitThresholdInKB' 'DWord' $ramKB
+    Write-Host "  svchost split: consolidated (fewer processes)" -ForegroundColor Green
+} catch {}
+
+# ── Power throttling off — stops CPU down-clocking foreground app threads ────
+Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' 'PowerThrottlingOff' 'DWord' 1
+
+# ── Fault-Tolerant Heap off — removes monitoring overhead on crashy apps ─────
+Set-Reg 'HKLM:\SOFTWARE\Microsoft\FTH' 'Enabled' 'DWord' 0
+
+# ── Network latency stack (gaming) ───────────────────────────────────────────
+Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters' 'TcpAckFrequency'    'DWord' 1
+Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters' 'TCPNoDelay'         'DWord' 1
+Set-Reg 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters' 'TcpDelAckTicks'     'DWord' 0
+netsh int tcp set global ecncapability=disabled 2>$null | Out-Null
+netsh int tcp set global rsc=disabled 2>$null | Out-Null
+netsh int tcp set global timestamps=disabled 2>$null | Out-Null
+# Nagle off per interface (desktop gaming)
+Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces' -EA SilentlyContinue | ForEach-Object {
+    Set-ItemProperty -Path $_.PSPath -Name 'TcpAckFrequency' -Type DWord -Value 1 -EA SilentlyContinue
+    Set-ItemProperty -Path $_.PSPath -Name 'TCPNoDelay'      -Type DWord -Value 1 -EA SilentlyContinue
+}
+Write-Host "  Network: Nagle off, ECN/RSC/timestamps off, ack tuned" -ForegroundColor Green
 
 # ── Disable Game Bar presence writer + Xbox overlay ──────────────────────────
 Set-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR' 'AllowGameDVR' 'DWord' 0
@@ -112,4 +158,4 @@ powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE 2 2>$null
 powercfg /setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0 2>$null
 
 Write-Host "Endrit OS: Deep FPS tweaks applied." -ForegroundColor Green
-Write-Host "  MMCSS Priority: 6/8 GPU | CPU PriSep: 38 | Core parking: off | MPO: fix | Timer: global" -ForegroundColor Cyan
+Write-Host "  MMCSS 6/8 GPU | PriSep 38 | MSI mode | per-game High | svchost merged | Nagle/ECN/RSC off | parking off | MPO fix | power-throttle off" -ForegroundColor Cyan

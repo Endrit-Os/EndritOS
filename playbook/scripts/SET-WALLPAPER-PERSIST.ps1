@@ -1,4 +1,4 @@
-# Endrit OS v2.4 — Wallpaper persistence via logon scheduled task
+﻿# Endrit OS v2.4 — Wallpaper persistence via logon scheduled task
 # Registers a task that re-applies the wallpaper at every user logon,
 # so it survives reboots and Windows Update resets.
 $ErrorActionPreference = 'Stop'

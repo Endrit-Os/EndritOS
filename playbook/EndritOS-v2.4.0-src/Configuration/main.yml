@@ -1,6 +1,6 @@
 ---
-title: Endrit OS v2.4
-description: Optimized Windows 11 — Ranked Safe, Privacy, Performance
+title: Endrit OS v2.5
+description: Optimized Windows 11 — Ranked Safe, Privacy, Performance, 9.6 hardening
 privilege: Admin
 actions:
 
@@ -17,7 +17,7 @@ actions:
       command: >-
         try {
           Enable-ComputerRestore -Drive 'C:\' -ErrorAction SilentlyContinue;
-          Checkpoint-Computer -Description 'Before Endrit OS v2.4' -RestorePointType 'APPLICATION_INSTALL' -ErrorAction SilentlyContinue
+          Checkpoint-Computer -Description 'Before Endrit OS v2.5' -RestorePointType 'APPLICATION_INSTALL' -ErrorAction SilentlyContinue
         } catch {}
 
   # ─── Kill Explorer before system changes ─────────────────────────────────

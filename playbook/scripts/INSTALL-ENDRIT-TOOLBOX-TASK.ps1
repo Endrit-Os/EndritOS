@@ -1,4 +1,4 @@
-# Endrit OS v2.4 — Register wallpaper task + update Toolbox config
+﻿# Endrit OS v2.4 — Register wallpaper task + update Toolbox config
 # Run as Admin after install
 param([switch]$Uninstall)
 

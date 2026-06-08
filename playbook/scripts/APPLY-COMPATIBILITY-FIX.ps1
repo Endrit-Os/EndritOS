@@ -1,4 +1,4 @@
-# Endrit OS v2.4 — Compatibility Fixer (targets 95%+ PC compatibility)
+﻿# Endrit OS v2.4 — Compatibility Fixer (targets 95%+ PC compatibility)
 # Handles AMD APU, Intel integrated, old GPU, WiFi, Surface, OEM systems
 $ErrorActionPreference = 'SilentlyContinue'
 

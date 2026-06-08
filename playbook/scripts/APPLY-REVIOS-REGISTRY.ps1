@@ -1,4 +1,4 @@
-# Endrit OS v2.4 — Registry tweaks from ReviOS playbook
+﻿# Endrit OS v2.4 — Registry tweaks from ReviOS playbook
 # Source: github.com/meetrevision/playbook (CC-BY-SA 4.0)
 $ErrorActionPreference = 'SilentlyContinue'
 

@@ -1,4 +1,4 @@
-# Endrit OS v2.4 — Services from ReviOS playbook (merged)
+﻿# Endrit OS v2.4 — Services from ReviOS playbook (merged)
 # Source: github.com/meetrevision/playbook (CC-BY-SA 4.0)
 $ErrorActionPreference = 'SilentlyContinue'
 
