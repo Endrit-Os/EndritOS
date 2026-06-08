@@ -1,0 +1,16 @@
+# Build outputs
+toolbox-build/
+toolbox-endrit/
+*.zip
+*.exe
+*.apbx
+
+# Discord setup scripts (not part of OS)
+discord-setup.ps1
+discord_*.py
+
+# Temp
+*.tmp
+*.log
+Thumbs.db
+.DS_Store

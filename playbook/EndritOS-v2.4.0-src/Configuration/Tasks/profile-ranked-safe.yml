@@ -4,7 +4,14 @@ description: Keeps Defender, BFE, EventLog running. Safe for Vanguard/VAC/EAC.
 privilege: TrustedInstaller
 actions:
 
-  - !writeStatus: {status: "Endrit OS: Applying Ranked Safe profile"}
+  - !writeStatus: {status: "Endrit OS: Applying Ranked Safe profile (91%+ compatibility)"}
+  # NOTE: Ranked Safe intentionally skips risky tweaks:
+  # - No disabledynamictick (AMD Ryzen BSOD risk)
+  # - No tscsyncpolicy enhanced (old Intel slow boot)
+  # - No forced VBS (old GPU driver BSOD risk)
+  # - No ASR rule 56a863a9 (blocks Realtek/Intel audio drivers)
+  # - No per-interface Nagle off (WiFi connectivity issues)
+  # These are available as Toolbox toggles for advanced users.
 
   # Defender MUST be on
   - !service: {name: 'WinDefend',  operation: change, startup: 2}

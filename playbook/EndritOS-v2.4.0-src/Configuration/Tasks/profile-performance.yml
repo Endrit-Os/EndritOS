@@ -4,7 +4,10 @@ description: Maximum tweaks. IFEO telemetry blocks, extra service disables. May 
 privilege: TrustedInstaller
 actions:
 
-  - !writeStatus: {status: "Endrit OS: Applying Performance profile"}
+  - !writeStatus: {status: "Endrit OS: Applying Performance profile (test in VM first!)"}
+
+  # Extra boot tweaks — effective but ~8% risk on AMD/old Intel
+  - !task: {path: 'Configuration\Tasks\registry\performance-extra.yml'}
 
   # Additional service disables (beyond Ranked Safe)
   - !service: {name: 'SysMain',   operation: change, startup: 4}

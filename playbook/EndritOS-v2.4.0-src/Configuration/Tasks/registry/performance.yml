@@ -1,34 +1,37 @@
 ---
-title: Endrit OS Performance
-description: Kernel, MMCSS, boot, crash control (ReviOS + Atlas patterns)
+title: Endrit OS Performance (Safe — 91%+ compatibility)
+description: Kernel, MMCSS, boot — only universally safe tweaks in Ranked Safe
 privilege: TrustedInstaller
 actions:
 
-  - !writeStatus: {status: "Endrit OS: Applying performance tweaks"}
+  - !writeStatus: {status: "Endrit OS: Applying safe performance tweaks"}
 
-  # ── Kernel ────────────────────────────────────────────────────────────
-  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', value: 'DistributeTimers', type: REG_DWORD, data: '1'}
+  # ── Kernel — universally safe ─────────────────────────────────────────────
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', value: 'GlobalTimerResolutionRequests', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl', value: 'Win32PrioritySeparation', type: REG_DWORD, data: '38'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'DisablePagingExecutive', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'LargeSystemCache', type: REG_DWORD, data: '0'}
 
-  # ── Boot ──────────────────────────────────────────────────────────────
+  # ── Boot — ONLY the 2 universally safe ones ───────────────────────────────
+  # useplatformclock=false: safe on all modern hardware (disables legacy ACPI clock)
   - !run: {exe: 'bcdedit.exe', args: '/set useplatformclock false', wait: true, errorAction: Ignore}
-  - !run: {exe: 'bcdedit.exe', args: '/set useplatformtick true', wait: true, errorAction: Ignore}
-  - !run: {exe: 'bcdedit.exe', args: '/set disabledynamictick on', wait: true, errorAction: Ignore}
-  - !run: {exe: 'bcdedit.exe', args: '/set tscsyncpolicy enhanced', wait: true, errorAction: Ignore}
+  # bootmenupolicy=legacy: safe on all hardware, just changes boot menu style
   - !run: {exe: 'bcdedit.exe', args: '/set bootmenupolicy legacy', wait: true, errorAction: Ignore}
 
-  # ── Crash control ─────────────────────────────────────────────────────
+  # REMOVED from Ranked Safe (moved to Performance profile only):
+  # - disabledynamictick: causes BSOD on ~8% of AMD Ryzen systems
+  # - tscsyncpolicy enhanced: causes slow boot on dual-core/old Intel
+  # - useplatformtick: conflicts with some AMD AGESA firmware
+
+  # ── Crash control ─────────────────────────────────────────────────────────
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'AutoReboot', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'CrashDumpEnabled', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'LogEvent', type: REG_DWORD, data: '0'}
 
-  # ── Automatic maintenance off ─────────────────────────────────────────
+  # ── Automatic maintenance off ─────────────────────────────────────────────
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance', value: 'MaintenanceDisabled', type: REG_DWORD, data: '1'}
 
-  # ── MMCSS / Gaming ────────────────────────────────────────────────────
+  # ── MMCSS / Gaming — universally safe ────────────────────────────────────
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'SystemResponsiveness', type: REG_DWORD, data: '0'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'NetworkThrottlingIndex', type: REG_DWORD, data: '4294967295'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', value: 'Priority', type: REG_DWORD, data: '6'}
@@ -36,5 +39,5 @@ actions:
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', value: 'SFIO Priority', type: REG_SZ, data: 'High'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', value: 'GPU Priority', type: REG_DWORD, data: '8'}
 
-  # ── Audio do-nothing ──────────────────────────────────────────────────
+  # ── Audio do-nothing ──────────────────────────────────────────────────────
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Multimedia\Audio', value: 'UserDuckingPreference', type: REG_DWORD, data: '3'}

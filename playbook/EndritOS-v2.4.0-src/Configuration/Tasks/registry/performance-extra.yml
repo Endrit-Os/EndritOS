@@ -1,0 +1,21 @@
+---
+title: Endrit OS Performance Extra (Performance profile only)
+description: Riskier tweaks moved here — only applied in Performance profile
+privilege: TrustedInstaller
+actions:
+
+  - !writeStatus: {status: "Endrit OS: Applying extra performance tweaks (Performance profile)"}
+
+  # These tweaks are effective but not universally compatible.
+  # Only applied when user explicitly chooses Performance profile.
+
+  # ── Boot tweaks — effective but ~8% risk ──────────────────────────────────
+  # disabledynamictick: great for latency, but causes issues on some AMD Ryzen
+  - !run: {exe: 'bcdedit.exe', args: '/set disabledynamictick on', wait: true, errorAction: Ignore}
+  # tscsyncpolicy: reduces timer drift on multi-core, but slow on old Intel
+  - !run: {exe: 'bcdedit.exe', args: '/set tscsyncpolicy enhanced', wait: true, errorAction: Ignore}
+  # useplatformtick: consistent timing, but conflicts with some AMD AGESA
+  - !run: {exe: 'bcdedit.exe', args: '/set useplatformtick true', wait: true, errorAction: Ignore}
+
+  # ── Extra kernel ──────────────────────────────────────────────────────────
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', value: 'DistributeTimers', type: REG_DWORD, data: '1'}
