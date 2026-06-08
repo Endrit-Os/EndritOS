@@ -1,0 +1,40 @@
+---
+title: Endrit OS — Ranked Safe Profile
+description: Keeps Defender, BFE, EventLog running. Safe for Vanguard/VAC/EAC.
+privilege: TrustedInstaller
+actions:
+
+  - !writeStatus: {status: "Endrit OS: Applying Ranked Safe profile"}
+
+  # Defender MUST be on
+  - !service: {name: 'WinDefend',  operation: change, startup: 2}
+  - !service: {name: 'Sense',      operation: change, startup: 2}
+  - !service: {name: 'WdNisSvc',   operation: change, startup: 3}
+  # Firewall base
+  - !service: {name: 'mpssvc',     operation: change, startup: 2}
+  - !service: {name: 'BFE',        operation: change, startup: 2}
+  # Event log (EAC / VAC diagnostics)
+  - !service: {name: 'EventLog',   operation: change, startup: 2}
+
+  # No IFEO blocks on game executables in this profile
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\valorant-win64-shipping.exe', value: 'Debugger', operation: delete, errorAction: Ignore}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\cs2.exe', value: 'Debugger', operation: delete, errorAction: Ignore}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\r5apex.exe', value: 'Debugger', operation: delete, errorAction: Ignore}
+
+  # Wallpaper persistence task
+  - !powerShell:
+      wait: true
+      command: >-
+        $s = 'C:\WINDOWS\EndritModules\Scripts\SET-WALLPAPER-PERSIST.ps1';
+        if (Test-Path $s) { & $s }
+
+  # Write config
+  - !powerShell:
+      wait: true
+      command: >-
+        $c = 'C:\ProgramData\EndritOS\config.json';
+        if (Test-Path $c) {
+          $j = Get-Content $c -Raw | ConvertFrom-Json;
+          $j.version = '2.4.0'; $j.profile = 'ranked-safe'; $j.competitiveReady = $true;
+          $j | ConvertTo-Json | Set-Content $c -Encoding UTF8
+        }

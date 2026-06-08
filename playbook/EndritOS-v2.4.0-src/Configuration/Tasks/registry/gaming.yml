@@ -1,0 +1,32 @@
+---
+title: Endrit OS Gaming (Ranked Safe)
+description: Anti-cheat friendly tweaks — Vanguard, VAC, EAC
+privilege: TrustedInstaller
+actions:
+
+  - !writeStatus: {status: "Endrit OS: Applying Ranked Safe gaming tweaks"}
+
+  # ── Defender required for Vanguard trust ─────────────────────────────
+  # (Defender is NOT disabled in ranked-safe profile)
+
+  # ── Game DVR / Xbox Game Bar ─────────────────────────────────────────
+  - !registryValue: {path: 'HKCU\System\GameConfigStore', value: 'GameDVR_Enabled', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\System\GameConfigStore', value: 'GameDVR_FSEBehaviorMode', type: REG_DWORD, data: '2'}
+  - !registryValue: {path: 'HKCU\System\GameConfigStore', value: 'GameDVR_HonorUserFSEBehaviorMode', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\System\GameConfigStore', value: 'GameDVR_DXGIHonorFSEWindowsCompatible', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\System\GameConfigStore', value: 'GameDVR_EFSEBehaviorMode', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR', value: 'AllowGameDVR', type: REG_DWORD, data: '0'}
+
+  # ── Mouse / Input ─────────────────────────────────────────────────────
+  - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseSpeed', type: REG_SZ, data: '0'}
+  - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseThreshold1', type: REG_SZ, data: '0'}
+  - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseThreshold2', type: REG_SZ, data: '0'}
+
+  # ── Fullscreen optimization ────────────────────────────────────────────
+  - !registryValue: {path: 'HKCU\System\GameConfigStore', value: 'GameDVR_DSEBehavior', type: REG_DWORD, data: '2'}
+
+  # ── LLMNR off ─────────────────────────────────────────────────────────
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient', value: 'EnableMulticast', type: REG_DWORD, data: '0'}
+
+  # ── Prevent Copilot Gaming DLL ────────────────────────────────────────
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Microsoft.Xbox.GamingAI.Companion.Host.GamingCompanionHostOptions', value: 'ActivationType', type: REG_DWORD, data: '4294967295'}

@@ -1,0 +1,47 @@
+---
+title: Endrit OS Finalize
+description: Ping install, wallpaper, write setup complete, prompt restart
+privilege: Admin
+actions:
+
+  - !writeStatus: {status: "Endrit OS: Finalizing..."}
+
+  # Apply wallpaper
+  - !powerShell:
+      wait: true
+      command: >-
+        $s = 'C:\WINDOWS\EndritModules\Scripts\APPLY-WALLPAPER.ps1';
+        if (Test-Path $s) { & $s }
+
+  # Wallpaper persistence task
+  - !powerShell:
+      wait: true
+      command: >-
+        $s = 'C:\WINDOWS\EndritModules\Scripts\SET-WALLPAPER-PERSIST.ps1';
+        if (Test-Path $s) { & $s }
+
+  # Ping install counter
+  - !powerShell:
+      wait: true
+      command: >-
+        try { Invoke-WebRequest 'http://192.109.200.182/api/install' -Method POST -UseBasicParsing -TimeoutSec 5 | Out-Null } catch {}
+
+  # Write setup.json
+  - !powerShell:
+      wait: true
+      command: >-
+        $d = 'C:\ProgramData\EndritOS';
+        if (!(Test-Path $d)) { New-Item -ItemType Directory -Path $d -Force | Out-Null };
+        @{ setupComplete=$true; restartRecommended=$true; completedAt=(Get-Date -Format 'o'); message='Endrit OS v2.4.0 setup complete. Restart when convenient — open Endrit Toolbox from the desktop.' } | ConvertTo-Json | Set-Content "$d\setup.json" -Encoding UTF8
+
+  # Desktop shortcut
+  - !powerShell:
+      wait: true
+      command: >-
+        $s = 'C:\WINDOWS\EndritModules\Scripts\CREATE-DESKTOP-SHORTCUT.ps1';
+        if (Test-Path $s) { & $s }
+
+  # Restart Explorer
+  - !run: {exe: 'explorer.exe', wait: false, errorAction: Ignore}
+
+  - !writeStatus: {status: "Endrit OS v2.4.0 install complete — please restart"}

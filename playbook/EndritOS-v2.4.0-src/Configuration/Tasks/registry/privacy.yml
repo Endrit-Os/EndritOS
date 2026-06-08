@@ -1,0 +1,27 @@
+---
+title: Endrit OS Privacy
+description: Internet communication restrictions (ReviOS source)
+privilege: TrustedInstaller
+actions:
+
+  - !writeStatus: {status: "Endrit OS: Applying privacy policies"}
+
+  # Restrict internet communication (HKCU)
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', value: 'NoPublishingWizard', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', value: 'NoWebServices', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', value: 'NoOnlinePrintsWizard', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', value: 'NoInternetOpenWith', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Policies\Microsoft\Windows NT\Printers', value: 'DisableHTTPPrinting', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Policies\Microsoft\Windows\HandwritingErrorReports', value: 'PreventHandwritingErrorReports', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\Software\Policies\Microsoft\Windows\TabletPC', value: 'PreventHandwritingDataSharing', type: REG_DWORD, data: '1'}
+
+  # Restrict internet communication (HKLM)
+  - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', value: 'NoPublishingWizard', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer', value: 'NoWebServices', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\Software\Policies\Microsoft\PCHealth\HelpSvc', value: 'Headlines', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\Software\Policies\Microsoft\PCHealth\ErrorReporting', value: 'DoReport', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\Software\Policies\Microsoft\Windows\Internet Connection Wizard', value: 'ExitOnMSICW', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\Software\Policies\Microsoft\EventViewer', value: 'MicrosoftEventVwrDisableLinks', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\Software\Policies\Microsoft\Windows\Registration Wizard Control', value: 'NoRegistration', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\Software\Policies\Microsoft\Windows NT\Printers', value: 'DisableHTTPPrinting', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\Software\Policies\Microsoft\Windows\HandwritingErrorReports', value: 'PreventHandwritingErrorReports', type: REG_DWORD, data: '1'}

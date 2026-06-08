@@ -1,0 +1,25 @@
+---
+title: Endrit OS Security (Ranked Safe)
+description: Defender on, Firewall on, LLMNR off, privacy policies
+privilege: TrustedInstaller
+actions:
+
+  - !writeStatus: {status: "Endrit OS: Applying security settings"}
+
+  # Allow MS accounts optional
+  - !registryValue: {path: 'HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System', value: 'MSAOptional', type: REG_DWORD, data: '1'}
+
+  # LLMNR off
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient', value: 'EnableMulticast', type: REG_DWORD, data: '0'}
+
+  # Windows Error Reporting off
+  - !registryValue: {path: 'HKLM\Software\Policies\Microsoft\Windows\Windows Error Reporting', value: 'Disabled', type: REG_DWORD, data: '1'}
+
+  # Messaging cloud sync off
+  - !registryValue: {path: 'HKLM\Software\Policies\Microsoft\Windows\Messaging', value: 'AllowMessageSync', type: REG_DWORD, data: '0'}
+
+  # Advertising ID off
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo', value: 'DisabledByGroupPolicy', type: REG_DWORD, data: '1'}
+
+  # TIPC (text input privacy) off
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Input\TIPC', value: 'Enabled', type: REG_DWORD, data: '0'}

@@ -1,0 +1,53 @@
+---
+title: Endrit OS v2.4
+description: Optimized Windows 11 — Ranked Safe, Privacy, Performance
+privilege: Admin
+actions:
+
+  # ─── OEM / Branding ──────────────────────────────────────────────────────
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform', value: 'BackupProductKeyDefault', type: REG_SZ, data: ''}
+
+  # OEM info
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation', value: 'Manufacturer', type: REG_SZ, data: 'Endrit OS'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation', value: 'SupportURL', type: REG_SZ, data: 'http://192.109.200.182/docs/'}
+
+  # ─── Restore point ───────────────────────────────────────────────────────
+  - !powerShell:
+      wait: true
+      command: >-
+        try {
+          Enable-ComputerRestore -Drive 'C:\' -ErrorAction SilentlyContinue;
+          Checkpoint-Computer -Description 'Before Endrit OS v2.4' -RestorePointType 'APPLICATION_INSTALL' -ErrorAction SilentlyContinue
+        } catch {}
+
+  # ─── Kill Explorer before system changes ─────────────────────────────────
+  - !taskKill: {name: "explorer", errorAction: Ignore}
+  - !taskKill: {name: "SearchApp", errorAction: Ignore}
+  - !taskKill: {name: "SearchHost", errorAction: Ignore}
+  - !taskKill: {name: "RuntimeBroker", errorAction: Ignore}
+  - !taskKill: {name: "TextInputHost", errorAction: Ignore}
+  - !taskKill: {name: "ShellExperienceHost", errorAction: Ignore}
+  - !taskKill: {name: "Widgets", errorAction: Ignore}
+
+  # ─── Packages ────────────────────────────────────────────────────────────
+  - !task: {path: 'Configuration\Tasks\appx.yml'}
+  - !task: {path: 'Configuration\Tasks\sxs.yml'}
+
+  # ─── Services (ReviOS + Atlas pattern) ───────────────────────────────────
+  - !task: {path: 'Configuration\Tasks\services.yml'}
+
+  # ─── Registry ────────────────────────────────────────────────────────────
+  - !task: {path: 'Configuration\Tasks\registry\telemetry.yml'}
+  - !task: {path: 'Configuration\Tasks\registry\privacy.yml'}
+  - !task: {path: 'Configuration\Tasks\registry\performance.yml'}
+  - !task: {path: 'Configuration\Tasks\registry\explorer.yml'}
+  - !task: {path: 'Configuration\Tasks\registry\security.yml'}
+  - !task: {path: 'Configuration\Tasks\registry\gaming.yml'}
+
+  # ─── Profile-specific ────────────────────────────────────────────────────
+  - !task: {path: 'Configuration\Tasks\profile-ranked-safe.yml', option: 'ranked-safe'}
+  - !task: {path: 'Configuration\Tasks\profile-performance.yml', option: 'performance'}
+  - !task: {path: 'Configuration\Tasks\profile-laptop.yml', option: 'laptop'}
+
+  # ─── Finalize ────────────────────────────────────────────────────────────
+  - !task: {path: 'Configuration\Tasks\finalize.yml'}

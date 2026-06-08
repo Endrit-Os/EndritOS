@@ -1,0 +1,27 @@
+---
+title: Endrit OS — Laptop Profile
+description: Balanced power plan on battery, high performance on AC. Keeps WiFi/Bluetooth power management.
+privilege: TrustedInstaller
+actions:
+
+  - !writeStatus: {status: "Endrit OS: Applying Laptop profile"}
+
+  # Balanced power scheme (GUID: 381b4222-f694-41f0-9685-ff5bb260df2e)
+  - !run: {exe: 'powercfg.exe', args: '/setactive 381b4222-f694-41f0-9685-ff5bb260df2e', wait: true, errorAction: Ignore}
+
+  # Keep WiFi power saving active on DC
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Services\Ndu', value: 'Start', type: REG_DWORD, data: '4'}
+
+  # Battery saver threshold
+  - !run: {exe: 'powercfg.exe', args: '/setdcvalueindex scheme_current 54533251-82be-4824-96c1-47b60b740d00 893dee8e-2bef-41e0-89c6-b55d0929964c 50', wait: true, errorAction: Ignore}
+
+  # Write config
+  - !powerShell:
+      wait: true
+      command: >-
+        $c = 'C:\ProgramData\EndritOS\config.json';
+        if (Test-Path $c) {
+          $j = Get-Content $c -Raw | ConvertFrom-Json;
+          $j.version = '2.4.0'; $j.profile = 'laptop';
+          $j | ConvertTo-Json | Set-Content $c -Encoding UTF8
+        }

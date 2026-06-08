@@ -1,0 +1,25 @@
+name: Feature / Tweak Request
+description: Suggest a new tweak, option, or improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What should Endrit OS do differently?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Playbook tweak
+        - Toolbox feature
+        - New install option / profile
+        - Documentation
+        - Website
+        - Other
+  - type: textarea
+    id: benefit
+    attributes:
+      label: Why would this help?

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord Support
+    url: https://discord.gg/endritos
+    about: Get help from the community on Discord
+  - name: Documentation
+    url: http://192.109.200.182/docs/
+    about: Read the installation guide and known issues first

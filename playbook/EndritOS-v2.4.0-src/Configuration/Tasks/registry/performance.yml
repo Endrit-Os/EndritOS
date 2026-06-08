@@ -1,0 +1,40 @@
+---
+title: Endrit OS Performance
+description: Kernel, MMCSS, boot, crash control (ReviOS + Atlas patterns)
+privilege: TrustedInstaller
+actions:
+
+  - !writeStatus: {status: "Endrit OS: Applying performance tweaks"}
+
+  # ── Kernel ────────────────────────────────────────────────────────────
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', value: 'DistributeTimers', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel', value: 'GlobalTimerResolutionRequests', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl', value: 'Win32PrioritySeparation', type: REG_DWORD, data: '38'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'DisablePagingExecutive', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management', value: 'LargeSystemCache', type: REG_DWORD, data: '0'}
+
+  # ── Boot ──────────────────────────────────────────────────────────────
+  - !run: {exe: 'bcdedit.exe', args: '/set useplatformclock false', wait: true, errorAction: Ignore}
+  - !run: {exe: 'bcdedit.exe', args: '/set useplatformtick true', wait: true, errorAction: Ignore}
+  - !run: {exe: 'bcdedit.exe', args: '/set disabledynamictick on', wait: true, errorAction: Ignore}
+  - !run: {exe: 'bcdedit.exe', args: '/set tscsyncpolicy enhanced', wait: true, errorAction: Ignore}
+  - !run: {exe: 'bcdedit.exe', args: '/set bootmenupolicy legacy', wait: true, errorAction: Ignore}
+
+  # ── Crash control ─────────────────────────────────────────────────────
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'AutoReboot', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'CrashDumpEnabled', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SYSTEM\CurrentControlSet\Control\CrashControl', value: 'LogEvent', type: REG_DWORD, data: '0'}
+
+  # ── Automatic maintenance off ─────────────────────────────────────────
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance', value: 'MaintenanceDisabled', type: REG_DWORD, data: '1'}
+
+  # ── MMCSS / Gaming ────────────────────────────────────────────────────
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'SystemResponsiveness', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile', value: 'NetworkThrottlingIndex', type: REG_DWORD, data: '4294967295'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', value: 'Priority', type: REG_DWORD, data: '6'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', value: 'Scheduling Category', type: REG_SZ, data: 'High'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', value: 'SFIO Priority', type: REG_SZ, data: 'High'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games', value: 'GPU Priority', type: REG_DWORD, data: '8'}
+
+  # ── Audio do-nothing ──────────────────────────────────────────────────
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Multimedia\Audio', value: 'UserDuckingPreference', type: REG_DWORD, data: '3'}

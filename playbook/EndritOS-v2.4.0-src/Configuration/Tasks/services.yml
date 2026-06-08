@@ -1,0 +1,61 @@
+---
+title: Endrit OS Services
+description: Disable telemetry, bloat, and Xbox services (ReviOS + Atlas patterns)
+privilege: TrustedInstaller
+actions:
+
+  - !writeStatus: {status: "Endrit OS: Configuring services"}
+
+  # ── Telemetry / Diagnostics ────────────────────────────────────────────
+  - !service: {name: 'DiagTrack',    operation: change, startup: 4}
+  - !service: {name: 'WerSvc',       operation: change, startup: 4}
+  - !service: {name: 'WdiServiceHost', operation: change, startup: 4}
+  - !service: {name: 'WdiSystemHost',  operation: change, startup: 4}
+  - !service: {name: 'PcaSvc',       operation: change, startup: 4}
+  - !service: {name: 'wisvc',        operation: change, startup: 4}
+  - !service: {name: 'diagnosticshub.standardcollector.service', operation: change, startup: 4}
+  - !service: {name: 'UCPD',         operation: change, startup: 4}
+  - !powerShell: {command: "Disable-ScheduledTask -TaskPath '\\Microsoft\\Windows\\AppxDeploymentClient' -TaskName 'UCPD velocity' -ErrorAction SilentlyContinue"}
+  - !service: {name: 'Telemetry',    operation: change, startup: 4}
+
+  # ── Xbox / Gaming telemetry ────────────────────────────────────────────
+  - !service: {name: 'XblAuthManager', operation: change, startup: 4}
+  - !service: {name: 'XblGameSave',    operation: change, startup: 4}
+  - !service: {name: 'XboxGipSvc',     operation: change, startup: 4}
+  - !service: {name: 'XboxNetApiSvc',  operation: change, startup: 4}
+
+  # ── Location / Sensors ─────────────────────────────────────────────────
+  - !service: {name: 'lfsvc',          operation: change, startup: 4}
+  - !service: {name: 'SensorDataService', operation: change, startup: 4}
+  - !service: {name: 'SensrSvc',       operation: change, startup: 4}
+
+  # ── Misc bloat ──────────────────────────────────────────────────────────
+  - !service: {name: 'MapsBroker',     operation: change, startup: 4}
+  - !service: {name: 'RetailDemo',     operation: change, startup: 4}
+  - !service: {name: 'WMPNetworkSvc',  operation: change, startup: 4}
+  - !service: {name: 'PrintNotify',    operation: change, startup: 4}
+  - !service: {name: 'SmsRouter',      operation: change, startup: 4}
+  - !service: {name: 'CDPSvc',         operation: change, startup: 4}
+  - !service: {name: 'PhoneSvc',       operation: change, startup: 4}
+  - !service: {name: 'WpnService',     operation: change, startup: 4}
+  - !service: {name: 'WpcMonSvc',      operation: change, startup: 4}
+  - !service: {name: 'WalletService',  operation: change, startup: 4}
+  - !service: {name: 'SEMgrSvc',       operation: change, startup: 4}
+  - !service: {name: 'SharedRealitySvc', operation: change, startup: 4}
+  - !service: {name: 'stisvc',         operation: change, startup: 4}
+  - !service: {name: 'WiaRpc',         operation: change, startup: 4}
+  - !service: {name: 'FrameServer',    operation: change, startup: 4}
+  - !service: {name: 'FrameServerMonitor', operation: change, startup: 4}
+
+  # ── Network ────────────────────────────────────────────────────────────
+  - !service: {name: 'NetBT',    operation: change, startup: 4}
+  - !service: {name: 'Wecsvc',   operation: change, startup: 4}
+  - !service: {name: 'tcpipreg', operation: change, startup: 4}
+  - !service: {name: 'dam',      operation: change, startup: 4}
+  - !service: {name: 'GpuEnergyDrv', operation: change, startup: 4}
+
+  # ── Must stay ──────────────────────────────────────────────────────────
+  # condrv: Automatic (fixes 0xd000003a)
+  - !service: {name: 'condrv',      operation: change, startup: 2}
+  # EdgeUpdate: Manual (WebView breaks if disabled)
+  - !service: {name: 'edgeupdate',  operation: change, startup: 3}
