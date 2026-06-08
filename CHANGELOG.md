@@ -2,6 +2,16 @@
 
 All notable changes to Endrit OS. Test every new version in a VM before your main PC.
 
+## [2.5.2] — 2026-06-08
+### Added
+- **Family / Safe profile** — maximum compatibility (~99%) for any PC, any user: keeps all security, Windows Update and Search on, only privacy/bloat cleanup + light speed. Great for a stranger's PC, older PCs, family, school, office.
+- **GPU + DirectStorage fine-tuning** (`APPLY-GPU-DIRECTSTORAGE.ps1`) — smart HAGS, BypassIO/DirectStorage, MPO fix, high-performance GPU preference.
+- **Benchmark** (`ENDRIT-BENCHMARK.ps1`) — CPU/RAM/process score before & after, written to JSON for the Toolbox.
+- **Profile export/import** (`ENDRIT-PROFILE.ps1`) — back up or share your tweak config as a portable .reg.
+- **Driver check** (`CHECK-DRIVERS.ps1`) — flags outdated GPU drivers with the right update link.
+- **Security dashboard** (`GET-SECURITY-STATUS.ps1`) — Defender, Tamper Protection, Firewall, Secure Boot, VBS, ASR, SmartScreen status.
+- **Per-tweak restore points** (`NEW-TWEAK-RESTOREPOINT.ps1`) — a restore point before every Toolbox change, so you can always roll back.
+
 ## [2.5.1] — 2026-06-08
 ### Added
 - **MAX tweak layer** (`endrit-max.yml`): memory management (DisablePagingExecutive, IoPageLockLimit, LargeSystemCache off), NTFS tuning (last-access off, 8.3 off, RefsDisableLastAccessUpdate), kernel timer serialization, GPU TDR delays, crash-dump off, scheduled defrag off.
